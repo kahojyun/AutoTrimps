@@ -1,6 +1,7 @@
 var ATversion='Zek v4.0.0',atscript=document.getElementById('AutoTrimps-script'),basepath='https://kahojyun.github.io/AutoTrimps/',modulepath='modules/';null!==atscript&&(basepath=atscript.src.replace(/AutoTrimps2\.js$/,''));
-function ATscriptLoad(a,b){null==b&&debug('Wrong Syntax. Script could not be loaded. Try ATscriptLoad(modulepath, \'example.js\'); ');var c=document.createElement('script');null==a&&(a=''),c.src=basepath+a+b+'.js',c.id=b+'_MODULE',document.head.appendChild(c)}
-function ATscriptUnload(a){var b=document.getElementById(a+"_MODULE");b&&(document.head.removeChild(b),debug("Removing "+a+"_MODULE","other"))}
+var loadedScript = {};
+function ATscriptLoad(a,b){null==b&&debug('Wrong Syntax. Script could not be loaded. Try ATscriptLoad(modulepath, \'example.js\'); ');var c=document.createElement('script');null==a&&(a=''),c.src=basepath+a+b+'.js',c.id=b+'_MODULE',c.onload=()=>{loadedScript[c.src]=true},loadedScript[c.src]=false,document.head.appendChild(c)}
+function ATscriptUnload(a){var b=document.getElementById(a+"_MODULE");b&&(delete loadedScript[b.src],document.head.removeChild(b),debug("Removing "+a+"_MODULE","other"))}
 ATscriptLoad(modulepath, 'utils');
 
 function initializeAutoTrimps() {
@@ -40,6 +41,7 @@ function printChangelog() {
 
 var runInterval = 100;
 var startupDelay = 4000;
+var loadRetry = 5;
 
 setTimeout(delayStart, startupDelay);
 
@@ -50,6 +52,19 @@ function delayStart() {
 }
 
 function delayStartAgain(){
+    for (var k in loadedScript) {
+        if (!loadedScript[k]) {
+            loadRetry--;
+            if (loadRetry > 0) {
+                setTimeout(delayStartAgain, startupDelay);
+                return;
+            }
+            else {
+                debug('Failed to load ' + k);
+                return;
+            }
+        }
+    }
     game.global.addonUser = true;
     game.global.autotrimps = true;
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
