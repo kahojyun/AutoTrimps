@@ -41,13 +41,12 @@ function printChangelog() {
 
 var runInterval = 100;
 var startupDelay = 4000;
-var loadRetry = 5;
+var loadRetry = 10;
 
 setTimeout(delayStart, startupDelay);
 
 function delayStart() {
     initializeAutoTrimps();
-    printChangelog();
     setTimeout(delayStartAgain, startupDelay);
 }
 
@@ -65,6 +64,7 @@ function delayStartAgain(){
             }
         }
     }
+    printChangelog();
     game.global.addonUser = true;
     game.global.autotrimps = true;
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
